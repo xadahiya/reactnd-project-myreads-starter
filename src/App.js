@@ -2,6 +2,7 @@ import React from 'react'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
 import {Link, Route} from 'react-router-dom';
+import {Debounce} from 'react-throttle';
 
 class BooksApp extends React.Component {
   state = {
@@ -68,17 +69,20 @@ class BooksApp extends React.Component {
   handleSearch(query) {
     BooksAPI.search(query, 10).then((results) => {
       if (results.length > 0) {
+        results.map((book) => {
+          let shelfBook = this.state.books.filter((b) => {
+            return b.id === book.id
+          })
+          if (shelfBook.length !== 0) {
+            book.shelf = shelfBook[0].shelf
+          }
+          return book
+        })
         this.setState((state) => ({searchResults: results}))
       } else {
         console.log('No Books found!')
       }
     })
-  }
-
-  handleKeyPress(e) {
-    if (e.key === 'Enter') {
-      this.handleSearch(e.target.value)
-    }
   }
 
   render() {
@@ -91,7 +95,9 @@ class BooksApp extends React.Component {
               <Link className="close-search" to="/">Close</Link>
               <div className="search-books-input-wrapper">
                 {/* NOTES: The search from BooksAPI is limited to a particular set of search terms. You can find these search terms here: https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if you don't find a specific author or title. Every search is limited by search terms. */}
-                <input type="text" placeholder="Search by title or author" onKeyPress={(e) => this.handleKeyPress(e)}/>
+                <Debounce time="200" handler="onChange">
+                  <input type="text" placeholder="Search by title or author" onChange={(e) => this.handleSearch(e.target.value)}/>
+                </Debounce>
               </div>
             </div>
             <div className="search-books-results">
