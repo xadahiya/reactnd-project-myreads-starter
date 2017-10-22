@@ -5,9 +5,14 @@ import {Link, Route} from 'react-router-dom';
 import {Debounce} from 'react-throttle';
 
 class BooksApp extends React.Component {
-  state = {
-    books: [],
-    searchResults: []
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      books: [],
+      searchResults: []
+    }
   }
 
   componentDidMount() {
